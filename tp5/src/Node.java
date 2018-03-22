@@ -56,27 +56,110 @@ public class Node {
 	}
 
 	public Node fusion(Node autre) throws DifferentOrderTrees {
-		// A completer
-		return null;
+		if (this.ordre != autre.ordre)
+			throw new DifferentOrderTrees();
+		if (this.parent != null || autre.parent != null)
+			throw new DifferentOrderTrees("Erreur : on ne peut pas fusionner deux noeuds qui ne sont pas des racines");
+		if (this.getVal() < autre.getVal()) {
+			autre.addEnfant(this);
+			this.parent = autre;
+			autre.ordre = autre.enfants.size();
+			return autre;
+		}
+		else {
+			this.addEnfant(autre);
+			autre.parent = this;
+			ordre = enfants.size();
+			return this;
+		}
 	}
 
+	private void sortEnfants() {
+		ArrayList<Node> newEnfants = new ArrayList<Node>();
+		while (!enfants.isEmpty()) {
+			Node min = enfants.get(0);
+			for (Node n : enfants) {
+				if (n.ordre < min.ordre)
+					min = n;
+			}
+			newEnfants.add(min);
+			enfants.remove(min);
+		}
+		enfants = newEnfants;
+	}
+	
 	private void moveUp() {
-		// A completer
+		if (this.parent == null)
+			return;
+		else {
+			Node oldParent = this.parent;
+			//Changer le parent de this
+			this.parent = this.parent.parent;
+			if(this.parent != null) {
+				this.parent.addEnfant(this);
+				this.parent.removeEnfant(oldParent);
+			}
+			//Changer oldParent
+			oldParent.removeEnfant(this);
+			ArrayList<Node> oldEnfants = oldParent.enfants;
+			oldParent.enfants = this.enfants;
+			oldParent.ordre = oldParent.enfants.size();
+			//Changer this
+			this.enfants = oldEnfants;
+			this.addEnfant(oldParent);
+			this.ordre = this.enfants.size();
+			oldParent.parent = this;
+			//Changer les enfants
+			for(Node n: this.enfants)
+				n.parent=this;
+			for(Node n: oldParent.enfants)
+				n.parent = oldParent;
+		}
+		sortEnfants();
 	}
 
 	public ArrayList<Node> delete() {
-		// A completer
-		return null;
+		while(parent != null)
+			moveUp();
+		for(Node n : enfants)
+			n.parent = null;
+		return enfants;
 	}
 
 	public Node findValue(int valeur) {
-		// A completer
+		if (getVal() == valeur)
+			return this;
+		else if(getVal() < valeur)
+			return null;
+		else {
+			for (Node n : enfants) {
+				if (n.findValue(valeur) != null)
+					return n.findValue(valeur);
+			}
+		}
 		return null;
 	}
 
+	private Node findMax(ArrayList<Node> listNode) {
+		Node max = listNode.get(0);
+		for(Node n : listNode) {
+			if(n.getVal() > max.getVal())
+				max = n;
+		}
+		return max;
+	}
+	
 	public ArrayList<Integer> getElementsSorted() {
-		// A completer
-		return null;
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		list.add(this.getVal());
+		ArrayList<Node> listNode = this.enfants;
+		while(!listNode.isEmpty()) {
+			Node max=findMax(listNode);
+			list.add(max.getVal());
+			listNode.remove(max);
+			listNode.addAll(max.enfants);			
+		}
+		return list;
 	}
 
 	public void print() {

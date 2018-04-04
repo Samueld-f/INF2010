@@ -60,7 +60,7 @@ public class Node {
 			throw new DifferentOrderTrees();
 		if (this.parent != null || autre.parent != null)
 			throw new DifferentOrderTrees("Erreur : on ne peut pas fusionner deux noeuds qui ne sont pas des racines");
-		if (this.getVal() < autre.getVal()) {
+		if (this.valeur < autre.valeur) {
 			autre.addEnfant(this);
 			this.parent = autre;
 			autre.ordre = autre.enfants.size();
@@ -108,7 +108,6 @@ public class Node {
 			this.enfants = oldEnfants;
 			this.addEnfant(oldParent);
 			this.ordre = this.enfants.size();
-			oldParent.parent = this;
 			//Changer les enfants
 			for(Node n: this.enfants)
 				n.parent=this;
@@ -127,14 +126,15 @@ public class Node {
 	}
 
 	public Node findValue(int valeur) {
-		if (getVal() == valeur)
+		if (this.valeur == valeur)
 			return this;
-		else if(getVal() < valeur)
+		else if(this.valeur < valeur)
 			return null;
 		else {
 			for (Node n : enfants) {
-				if (n.findValue(valeur) != null)
-					return n.findValue(valeur);
+				Node retour = n.findValue(valeur);
+				if (retour != null)
+					return retour;
 			}
 		}
 		return null;

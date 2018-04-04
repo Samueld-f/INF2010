@@ -55,13 +55,13 @@ public class Monceau {
 				else if(arbre1 != null && arbre2 != null && retenue != null) {
 					retenue = retenue.fusion(arbre2);
 					autre.arbres.remove(arbre2);
-					arbres.remove(arbre1);
 				}
 			} catch (DifferentOrderTrees exception) {
 				System.out.println(exception);
 				return;
 			}
 		}
+		sortArbres();
 	}
 
 	public void insert(int val) {
@@ -72,26 +72,44 @@ public class Monceau {
 	}
 	
 	public boolean delete(int val) {
-		boolean trouve = false;
+			
+		boolean supprime = false;
 		boolean modifie = false;
-		for(Node n : arbres) {
-			while(n.findValue(val) != null) {
-				Monceau restant = new Monceau();
-				Node delete = n.findValue(val);
-				arbres.remove(n);
-				restant.arbres = delete.delete();
-				fusion(restant);				
-				trouve = true;
-				modifie = true;
+		for (Node n : arbres) {
+			Node remove = n.findValue(val);
+			while (remove != null) {
+					ArrayList<Node> enfants = remove.delete();
+					Monceau restants = new Monceau();
+					for(Node enfant: enfants)
+						restants.arbres.add(enfant);
+					arbres.remove(n);
+					modifie = true;
+					fusion(restants);
+					supprime = true;
+					remove = n.findValue(val);
 			}
 			if (modifie == true)
-				break;
+				break;		
 		}
 		if (modifie == true)
-			delete(val);
-		return trouve;
+			this.delete(val);
+		return supprime;
 	}
 
+	private void sortArbres() {
+		ArrayList<Node> newArbres = new ArrayList<Node>();
+		while (!arbres.isEmpty()) {
+			Node min = arbres.get(0);
+			for (Node n : arbres) {
+				if (n.ordre < min.ordre)
+					min = n;
+			}
+			newArbres.add(min);
+			arbres.remove(min);
+		}
+		arbres = newArbres;
+	}
+	
 	public void print() {
 		for (Node node : arbres) {
 			System.out.println("\n\nordre : " + node.ordre);
